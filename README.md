@@ -11,12 +11,7 @@
 	export LC_CTYPE=C 
 	export LANG=C
 
-#####3 下载安装[Diffmerge](https://sourcegear.com/diffmerge/downloads.php)
-
-#####4 配置Diffmerge命令行
-	$ sudo cp /Applications/DiffMerge.app/Contents/Resources/diffmerge.sh /usr/bin
-
-#####5 安装wiggle
+#####3 安装wiggle
 	$ sudo apt-get install -y wiggle
 	or
 	$ brew install -y wiggle
