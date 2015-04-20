@@ -2,7 +2,7 @@
 #升级引擎工具A篇
 
 ##适用范围
-对引擎源码没有修改或扩展的cocos2d-x/cocos2d-js项目，或者只做过少量修改。否则请查看`升级引擎工具B篇。`
+对引擎源码没有修改或扩展的cocos2d-x/cocos2d-js项目，或者只做过少量修改。否则请查看[升级引擎工具B篇](https://github.com/calfjohn/cocosUpgrade/blob/SemiAutomatic/README.md)。
 
 ##准备工作
 #####1 保证git能正常运行
