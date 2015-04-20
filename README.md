@@ -2,7 +2,7 @@
 #升级引擎工具B篇
 
 ##适用范围
-所有cocos2d-x/cocos2d-js项目。用此工具升级，需开发者自行对比升级后的差异。自动升级请查看`升级引擎工具A篇。`
+所有cocos2d-x/cocos2d-js项目。用此工具升级，需开发者自行对比升级后的差异。自动升级请查看[升级引擎工具A篇。](https://github.com/calfjohn/cocosUpgrade/blob/SemiAutomatic/README.md)
 
 ##准备工作
 #####1 保证git能正常运行
