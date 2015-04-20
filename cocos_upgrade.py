@@ -9,14 +9,34 @@
 
 import os
 import sys
-import excopy
 import cocos
+import excopy
+import subprocess
 import modify_file
-import modify_template
-import dowload_engine
+import shutil
 from argparse import ArgumentParser
 
 UPGRADE_PATH = 'Upgrade'
+
+#'3.0', '3.1.1', '3.2', '3.3',
+patchList = ['3.3rc2', '3.4', '3.5']
+# patchMap = {
+#             '3.4': '0005-35.patch',
+#             '3.3': '0004-34.patch',
+#             '3.2': '0003-33.patch',
+#             '3.1.1': '0002-32.patch',
+#             '3.0': '0001-311.patch'
+#             }
+
+patchMap = {
+            '3.5': '2lua35-36.diff',
+            '3.4': '1lua34-35.diff',
+            '3.3rc2': '0lua33rc2-34.diff',
+            '3.3': '0004-34.patch',
+            '3.2': '0003-33.patch',
+            '3.1.1': '0002-32.patch',
+            '3.0': '0001-311.patch'
+            }
 
 def os_is_win32():
     return sys.platform == 'win32'
@@ -25,69 +45,93 @@ def os_is_win32():
 def os_is_mac():
     return sys.platform == 'darwin'
 
+def get_project_version(proj_path):
+    file_path = os.path.join(proj_path, 'cocos2d/cocos/2d/cocos2d.cpp')
+    if not os.path.exists(file_path):
+        file_path = os.path.join(proj_path, 'cocos2d/cocos/cocos2d.cpp')
+        if not os.path.exists(file_path):
+            file_path = os.path.join(proj_path, 'frameworks/cocos2d-x/cocos/2d/cocos2d.cpp')
+            if not os.path.exists(file_path):
+                file_path = os.path.join(proj_path, 'frameworks/cocos2d-x/cocos/cocos2d.cpp')
+                if not os.path.exists(file_path):
+                    return None
+
+    file_modifier = modify_file.FileModifier(file_path)
+    version = file_modifier.findEngineVesion()
+    return get_key_by_version(version)
+
+
+def get_key_by_version(version):
+    for key in patchMap:
+        result = version.find(key)
+        if result > -1:
+            return key
+
+    return None
+
 if __name__ == '__main__':
     parser = ArgumentParser(description='Generate prebuilt engine for Cocos Engine.')
-    parser.add_argument('-s', dest='projPath', help='Your Project path.')
-    parser.add_argument('-d', dest='cocosPath', help='Latest cocos engine paths')
+    parser.add_argument('-d', dest='projPath', help='Your Project path.')
+    parser.add_argument('-n', dest='projName', help='Your Project name.')
+    parser.add_argument('-v', dest='upgradeVersion', help='Engine version to be upgrade.')
     (args, unknown) = parser.parse_known_args()
 
     if len(unknown) > 0:
         print('unknown arguments: %s' % unknown)
         sys.exit(1)
 
-    print('Receive arguments src:%s dst:%s' % (args.projPath, args.cocosPath))
-
-    if not os.path.exists(args.projPath) or not os.path.exists(args.cocosPath):
-        cocos.Logging.warning("> src or dst is not exists.")
+    if not os.path.exists(args.projPath):
+        cocos.Logging.warning("> Project is not exists.")
         sys.exit(1)
 
-    target_path = args.projPath + UPGRADE_PATH
-    target_project_path = os.path.join(target_path, 'Target')
+    print('Receive arguments target:%s name:%s version:%s' % (args.projPath, args.projName, args.upgradeVersion))
+
+    target_project_path = args.projPath + UPGRADE_PATH
     if not os.path.exists(target_project_path):
-        cocos.Logging.info("> Copy your project into %s ..." % target_path)
+        cocos.Logging.info("> Copy your project into %s ..." % target_project_path)
         excopy.copy_directory(args.projPath, target_project_path)
 
-    cocos.Logging.info("> Copying cocos2d from engine directory ...")
-    des_cocos2d_path = os.path.join(target_project_path, 'cocos2d')
-    excopy.remove_directory(des_cocos2d_path)
-    excopy.append_x_engine(args.cocosPath, des_cocos2d_path)
+    # Creat a git repository if there is not a repository
+    cmd = "git init \n git add -A \n git commit -m \'Init project for cocos upgrade.\'"
+    ret = subprocess.call(cmd, cwd=target_project_path, shell=True)
+    # if ret != 0:
+    #     sys.exit(1)
 
-    tempPath, filename = os.path.split(args.projPath)
-    proj_file_path = os.path.join(target_project_path, 'proj.win32/%s.vcxproj' % filename)
-    cocos.Logging.info("> Modifing visual studio project for win32 ... ")
-    modify_template.modify_win32(proj_file_path)
+    patch_path = str.format("%s/patch" % target_project_path)
+    if os.path.exists(patch_path):
+        shutil.rmtree(patch_path)
+    os.mkdir(patch_path)
 
-    if os_is_mac():
-        tempPath, filename = os.path.split(args.projPath)
-        proj_file_path = os.path.join(target_project_path, 'proj.ios_mac/%s.xcodeproj/project.pbxproj' % filename)
-        cocos.Logging.info("> Modifing xcode project for iOS&Mac ... ")
-        modify_template.modify_mac_ios(proj_file_path)
+    diff_path = str.format("%s/diff" % target_project_path)
+    if os.path.exists(diff_path):
+        shutil.rmtree(diff_path)
+    os.mkdir(diff_path)
 
-    mk_file_path = os.path.join(target_project_path, 'proj.android/jni/Android.mk')
-    cocos.Logging.info("> Modifing mk file for Android ...")
-    modify_template.modify_android(mk_file_path)
+    temp_find = False
+    patch_tag = get_project_version(target_project_path)
+    for i in patchList:
+        if patch_tag == i:
+            temp_find = True
+        if args.upgradeVersion == i:
+            break
+        if temp_find:
+            patch_file = os.path.join(os.getcwd(), 'patch', patchMap[i])
+            shutil.copy(patch_file, patch_path)
 
-    modify_file_path = os.path.join(target_project_path, 'proj.android/project.properties')
-    fileModifier = modify_file.FileModifier(modify_file_path)
-    fileModifier.replaceString('../cocos2d/cocos/platform/android/java', '../cocos2d/cocos/2d/platform/android/java')
-    fileModifier.save()
+    for roots, dirs, files in os.walk(patch_path):
+        for f in files:
+            cmd = str.format('sed -e \'s/HelloLua/%s/g\' %s > %s'
+                             % (args.projName, os.path.join(roots, f), os.path.join(diff_path, f)))
+            ret = subprocess.call(cmd, cwd=patch_path, shell=True)
+            if ret != 0:
+                sys.exit(1)
 
-    if os_is_mac():
-        modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/AppController.mm')
-        fileModifier = modify_file.FileModifier(modify_file_path)
-        fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
-        fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
-        fileModifier.save()
+    for roots, dirs, files in os.walk(diff_path):
+        for f in files:
+            cmd = str.format("git apply --reject -p 1 %s" % os.path.join(roots, f))
+            ret = subprocess.call(cmd, cwd=target_project_path, shell=True)
 
-        modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/RootViewController.mm')
-        fileModifier = modify_file.FileModifier(modify_file_path)
-        fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
-        fileModifier.save()
-
-    modify_file_path = os.path.join(target_project_path, 'Classes/AppDelegate.cpp')
-    fileModifier = modify_file.FileModifier(modify_file_path)
-    fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
-    fileModifier.save()
-
-    manifest_file_path = os.path.join(target_project_path, 'proj.android/AndroidManifest.xml')
-    modify_template.modify_manifest(manifest_file_path)
+            cmd = str.format("git add -A \n git commit -m \'%s\'" % f)
+            ret = subprocess.call(cmd, cwd=target_project_path, shell=True)
+            if ret != 0:
+                sys.exit(1)

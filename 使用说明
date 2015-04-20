@@ -1,0 +1,24 @@
+python cocos_upgrade.py -d 游戏工程目录 -n 游戏工程名称 -v 要升级的引擎版本（3.1.1 3.2 3.3 3.4 3.5)
+
+python cocos_upgrade2.py -d 游戏工程目录 -n 游戏工程名称 -p 升级用补丁目录
+
+eg：  python cocos_upgrade.py -d /Users/calf/xingxing -n xingxing -v 3.5
+
+目前支持3.x的cocos2dx游戏(c++)，升级到这些版本3.1.1 3.2 3.3 3.4 3.5，只能向上升级.
+
+
+准备工作
+1 保证git能正常运行
+
+2 以下内容加入~/.bash_profile
+export LC_CTYPE=C 
+export LANG=C
+
+3 安装diffmerge
+
+4 配置diffmerge命令行
+sudo cp diffmerge.sh /usr/bin
+
+
+
+36个文件 186个冲突

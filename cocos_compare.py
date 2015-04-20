@@ -9,7 +9,7 @@
 
 import os
 import sys
-import excopy
+import subprocess
 import cocos
 import compare_diff
 from argparse import ArgumentParser
@@ -25,37 +25,22 @@ def os_is_mac():
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Generate prebuilt engine for Cocos Engine.')
-    parser.add_argument('-s', dest='projPath', help='Your Project path')
-    parser.add_argument('-d', dest='cocosPath', help='Origin source path of cocos2d-x your project based.')
+    parser.add_argument('-s', dest='projSourcePath', help='Your Project path')
+    parser.add_argument('-d', dest='projUpgradePath', help='Your Target Project path')
+    parser.add_argument('-o', dest='projOriginPath', help='Your Origin Project path')
+
     (args, unknown) = parser.parse_known_args()
 
     if len(unknown) > 0:
         print('unknown arguments: %s' % unknown)
         sys.exit(1)
 
-    if not os.path.exists(args.projPath) or not os.path.exists(args.cocosPath):
-        cocos.Logging.warning("> src or dst is not exists.")
+    if not os.path.exists(args.projSourcePath) or not os.path.exists(args.projUpgradePath)\
+            or not os.path.exists(args.projOriginPath):
+        cocos.Logging.warning("> Path is not exists.")
         sys.exit(1)
 
-    print('Receive arguments src:%s dst:%s' % (args.projPath, args.cocosPath))
-
-    target_path = args.projPath + UPGRADE_PATH
-    user_cocos_path = os.path.join(target_path, 'UserCocos2d')
-    origin_cocos_path = os.path.join(target_path, 'OriginCocos2d')
-    target_project_path = os.path.join(target_path, 'Target')
-
-    if not os.path.exists(target_project_path):
-        cocos.Logging.info("> Copy your project into %s ..." % target_path)
-        excopy.copy_directory(args.projPath, target_project_path)
-    
-    src_cocos2d_path = os.path.join(args.projPath, 'cocos2d')
-    if not os.path.exists(user_cocos_path):
-        cocos.Logging.info("> Copy your cocos2d from %s into %s ..." % (src_cocos2d_path, user_cocos_path))
-        excopy.copy_directory(src_cocos2d_path, user_cocos_path)
-
-    if not os.path.exists(origin_cocos_path):
-        cocos.Logging.info("> Copy origin cocos2d into %s ..." % user_cocos_path)
-        excopy.append_x_engine(args.cocosPath, origin_cocos_path)
+    print('Receive arguments src:%s dst:%s ori:%s' % (args.projSourcePath, args.projUpgradePath, args.projOriginPath))
 
     diff_file = os.path.join(os.getcwd(), 'diff')
     if os.path.exists(diff_file):
@@ -67,9 +52,12 @@ if __name__ == '__main__':
         diff_tool = 'sgdm'
 
     cocos.Logging.info("> Preparing difference file %s ..." % diff_file)
-    cmd = str.format('%s -diff %s %s %s' % (diff_tool, diff_file, user_cocos_path, origin_cocos_path))
-    os.system(cmd)
+    cmd = str.format('%s -diff %s %s %s' % (diff_tool, diff_file, args.projSourcePath, args.projOriginPath))
+    ret = subprocess.call(cmd, shell=True)
+    # if ret != 0:
+    #     sys.exit(1)
+    #os.system(cmd)
 
     cocos.Logging.info("> Compare every single difference ...")
     compareFiles = compare_diff.CompareFiles(diff_file)
-    compareFiles.compare(os.path.join(target_project_path, 'cocos2d'))
+    compareFiles.compare(args.projUpgradePath)
