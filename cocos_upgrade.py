@@ -70,7 +70,7 @@ def get_key_by_version(version):
     return None
 
 if __name__ == '__main__':
-    parser = ArgumentParser(description='Generate prebuilt engine for Cocos Engine.')
+    parser = ArgumentParser(description='Upgrade Cocos Engine for your project.')
     parser.add_argument('-d', dest='projPath', help='Your Project path.')
     parser.add_argument('-n', dest='projName', help='Your Project name.')
     parser.add_argument('-v', dest='upgradeVersion', help='Engine version to be upgrade.')
