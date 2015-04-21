@@ -26,11 +26,14 @@ class FileModifier(object):
         self.file_lines = f.readlines()
         f.close()
 
-    def findEngineVesion(self):
+    def findEngineVesion(self, pattern):
+        p = re.compile(pattern)
         for line in self.file_lines:
-            result = line.find('return \"cocos2d-x ')
-            if result > -1:
-                return line
+            match = p.match(line)
+            if match:
+                ret = match.group(1)
+                return ret
+        return None
 
     def replaceString(self, newString, oldString):
         if self.file_lines is None or newString is None or oldString is None:

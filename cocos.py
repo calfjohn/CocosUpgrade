@@ -827,6 +827,25 @@ def _check_python_version():
 
     return True
 
+def check_project_type(path):
+    src_path = os.path.join(path, 'src')
+    if os.path.exists(src_path):
+        cmd = 'find . -name \'*.js\''
+        ret = subprocess.check_output(cmd, cwd=src_path, shell=True)
+        if ret != '':
+            return 'js'
+
+        cmd = 'find . -name \'*.lua\''
+        ret = subprocess.check_output(cmd, cwd=src_path, shell=True)
+        if ret != '':
+            return 'lua'
+    elif os.path.exists(os.path.join(path, 'Classes')):
+        cmd = 'find . -name \'*.cpp\''
+        ret = subprocess.check_output(cmd, cwd=path, shell=True)
+        if ret != '':
+            return 'cpp'
+
+    return None
 
 if __name__ == "__main__":
     DataStatistic.stat_event('cocos', 'start', 'invoked')
