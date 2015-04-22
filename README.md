@@ -6,8 +6,9 @@
 
 ##准备工作
 #####1 保证git能正常运行
-
-#####2 以下内容加入~/.bash_profile
+	$ git version
+	git version 1.9.3 (Apple Git-50)
+#####2 以下内容加入~/.bash_profile 或 ~/.zshrc
 	export LC_CTYPE=C 
 	export LANG=C
 
@@ -15,16 +16,19 @@
 	$ sudo apt-get install -y wiggle
 	or
 	$ brew install -y wiggle
+	
+	$ wiggle --version
+	wiggle 1.0 2013-08-23 GPL-2+ http://neil.brown.name/wiggle/
 
 ##如何使用
 
 有两种升级方式，请按自己的情况选择。
 
-第一种方式，会根据游戏工程的引擎版本自动寻找下载对应的升级文件。
+第一种方式，会根据游戏工程的引擎版本自动寻找下载对应的升级文件。（未完成）
 
 第二种方式，你需要自行指定升级文件，不过你可以自己创建符合自己需求的升级文件，请查看`制作升级文件`。
 
-	$ python cocos_upgrade.py -d /Users/testUpgrade -n testUpgrade -v 3.5
+	$ python cocos_upgrade.py -d /Users/testProject -n testProject -v 3.5
 	
 -d 游戏工程目录，请使用工程全路径。
 
@@ -32,14 +36,15 @@
 
 -v 要升级的引擎版本，请查看`支持的版本`。
 
-	$ python cocos_upgrade2.py -d /Users/testUpgrade -n testUpgrade -p /Users/test30-35.diff
+	$ python cocos_upgrade2.py -d /Users/testProject -n testProject -p /Users/test30-35.diff
 
 -d 游戏工程目录，请使用工程全路径。
 
 -n 游戏工程名称，请注意工程名有时与目录名称不一致，建议参考xcode工程名。
 
--p 升级用补丁，升级用补丁的文件全路径。此文件可到[cocos官方网站下载](http://www.cocos2d-x.org)下载，也可以自行制作。
+-p 升级用补丁，升级用补丁的文件全路径。此文件可到[cocos官方网站下载(未完成)](http://www.cocos2d-x.org)下载，也可以自行制作。
 
+`特别提醒：升级工作是在游戏工程的副本上进行的，副本目录是/Users/testProjectUpgrade/testProject`
 
 
 ##支持的版本
@@ -51,7 +56,7 @@
 	
 	
 ##升级说明
-升级工具会自动更新引擎源码，工程配置(.pbproj/.mk/.sln）文件，同时会产生少量文件冲突。
+升级工具会在游戏工程基础上，自动插入新版本引擎源码，工程配置(.pbproj/.mk/.sln）内容，同时会产生少量文件冲突。
 
 请解决冲突后编译运行。
 
