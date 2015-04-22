@@ -18,13 +18,6 @@ from argparse import ArgumentParser
 
 UPGRADE_PATH = 'Upgrade'
 
-def os_is_win32():
-    return sys.platform == 'win32'
-
-
-def os_is_mac():
-    return sys.platform == 'darwin'
-
 if __name__ == '__main__':
     parser = ArgumentParser(description='Generate prebuilt engine for Cocos Engine.')
     parser.add_argument('-s', dest='originCocos', help='Origin cocos engine path.')
@@ -57,22 +50,24 @@ if __name__ == '__main__':
         excopy.copy_directory(args.projPath, target_project_path)
 
     origin_project_path = os.path.join(target_path, 'Origin')
-    cocos.Logging.info("> Create origin project ...")
-    cocos_console_path = str.format('%s/tools/cocos2d-console/bin/cocos' % args.originCocos)
-    cmd = str.format('%s new -l %s %s -p %s -d %s' %
-                     (cocos_console_path, project_type, args.projName, 'org.cocos2dx.replace', origin_project_path))
-    ret = subprocess.call(cmd, shell=True)
-    if ret != 0:
-        sys.exit(1)
+    if not os.path.exists(origin_project_path):
+        cocos.Logging.info("> Create origin project ...")
+        cocos_console_path = str.format('%s/tools/cocos2d-console/bin/cocos' % args.originCocos)
+        cmd = str.format('%s new -l %s %s -p %s -d %s' %
+                         (cocos_console_path, project_type, args.projName, 'org.cocos2dx.replace', origin_project_path))
+        ret = subprocess.call(cmd, shell=True)
+        if ret != 0:
+            sys.exit(1)
 
     temp_project_path = os.path.join(target_path, 'Temp')
-    cocos.Logging.info("> Create temp project ...")
-    cocos_console_path = str.format('%s/tools/cocos2d-console/bin/cocos' % args.targetCocos)
-    cmd = str.format('%s new -l %s %s -p %s -d %s' %
-                     (cocos_console_path, project_type, args.projName, 'org.cocos2dx.replace', temp_project_path))
-    ret = subprocess.call(cmd, shell=True)
-    if ret != 0:
-        sys.exit(1)
+    if not os.path.exists(temp_project_path):
+        cocos.Logging.info("> Create temp project ...")
+        cocos_console_path = str.format('%s/tools/cocos2d-console/bin/cocos' % args.targetCocos)
+        cmd = str.format('%s new -l %s %s -p %s -d %s' %
+                         (cocos_console_path, project_type, args.projName, 'org.cocos2dx.replace', temp_project_path))
+        ret = subprocess.call(cmd, shell=True)
+        if ret != 0:
+            sys.exit(1)
 
     cocos.Logging.info("> Copying cocos2d from engine directory ...")
     if project_type == 'cpp':
@@ -97,42 +92,47 @@ if __name__ == '__main__':
         excopy.copy_directory(os.path.join(temp_project_path, args.projName, 'runtime'), temp_path2)
         excopy.copy_directory(os.path.join(temp_project_path, args.projName, 'tools'), temp_path3)
 
-    # tempPath, filename = os.path.split(args.projPath)
-    # proj_file_path = os.path.join(target_project_path, 'proj.win32/%s.vcxproj' % filename)
+    if project_type == 'js' or project_type == 'lua':
+        real_project_path = os.path.join(target_project_path, 'frameworks', 'runtime-src')
+    elif project_type == 'cpp':
+        real_project_path = target_project_path
+
+    # proj_file_path = os.path.join(real_project_path, 'proj.win32/%s.vcxproj' % args.projName)
     # cocos.Logging.info("> Modifing visual studio project for win32 ... ")
     # modify_template.modify_win32(proj_file_path)
-    #
-    # if os_is_mac():
-    #     tempPath, filename = os.path.split(args.projPath)
-    #     proj_file_path = os.path.join(target_project_path, 'proj.ios_mac/%s.xcodeproj/project.pbxproj' % filename)
-    #     cocos.Logging.info("> Modifing xcode project for iOS&Mac ... ")
-    #     modify_template.modify_mac_ios(proj_file_path)
-    #
-    # mk_file_path = os.path.join(target_project_path, 'proj.android/jni/Android.mk')
-    # cocos.Logging.info("> Modifing mk file for Android ...")
-    # modify_template.modify_android(mk_file_path)
-    #
-    # modify_file_path = os.path.join(target_project_path, 'proj.android/project.properties')
-    # fileModifier = modify_file.FileModifier(modify_file_path)
-    # fileModifier.replaceString('../cocos2d/cocos/platform/android/java', '../cocos2d/cocos/2d/platform/android/java')
-    # fileModifier.save()
-    #
-    # if os_is_mac():
-    #     modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/AppController.mm')
-    #     fileModifier = modify_file.FileModifier(modify_file_path)
-    #     fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
-    #     fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
-    #     fileModifier.save()
-    #
-    #     modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/RootViewController.mm')
-    #     fileModifier = modify_file.FileModifier(modify_file_path)
-    #     fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
-    #     fileModifier.save()
-    #
-    # modify_file_path = os.path.join(target_project_path, 'Classes/AppDelegate.cpp')
-    # fileModifier = modify_file.FileModifier(modify_file_path)
-    # fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
-    # fileModifier.save()
-    #
-    # manifest_file_path = os.path.join(target_project_path, 'proj.android/AndroidManifest.xml')
-    # modify_template.modify_manifest(manifest_file_path)
+
+    proj_file_path = os.path.join(real_project_path, 'proj.ios_mac/%s.xcodeproj/project.pbxproj' % args.projName)
+    cocos.Logging.info("> Modifing xcode project for iOS&Mac ... ")
+    modify_template.modify_mac_ios(proj_file_path)
+
+    mk_file_path = os.path.join(real_project_path, 'proj.android/jni/Android.mk')
+    cocos.Logging.info("> Modifing mk file for Android ...")
+    modify_template.modify_android(mk_file_path)
+
+    modify_file_path = os.path.join(real_project_path, 'proj.android/project.properties')
+    fileModifier = modify_file.FileModifier(modify_file_path)
+    fileModifier.replaceString('../cocos2d/cocos/platform/android/java', '../cocos2d/cocos/2d/platform/android/java')
+    fileModifier.save()
+
+    modify_file_path = os.path.join(real_project_path, 'proj.ios_mac/ios/AppController.mm')
+    fileModifier = modify_file.FileModifier(modify_file_path)
+    fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
+    fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
+    fileModifier.save()
+
+    modify_file_path = os.path.join(real_project_path, 'proj.ios_mac/ios/RootViewController.mm')
+    fileModifier = modify_file.FileModifier(modify_file_path)
+    fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
+    fileModifier.save()
+
+    modify_file_path = os.path.join(real_project_path, 'Classes/AppDelegate.cpp')
+    fileModifier = modify_file.FileModifier(modify_file_path)
+    fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
+    fileModifier.save()
+
+    manifest_file_path = os.path.join(real_project_path, 'proj.android/AndroidManifest.xml')
+    modify_template.modify_manifest(manifest_file_path)
+
+    cmd = str.format('python cocos_compare2.py -s %s -d %s -o %s ' %
+                     (args.projPath, target_project_path, os.path.join(origin_project_path, args.projName)))
+    subprocess.call(cmd, cwd=os.getcwd(), shell=True)

@@ -18,20 +18,11 @@ from argparse import ArgumentParser
 
 UPGRADE_PATH = 'Upgrade'
 
-def os_is_win32():
-    return sys.platform == 'win32'
-
-
-def os_is_mac():
-    return sys.platform == 'darwin'
-
-
 version_files = ['cocos2d/cocos/cocos2d.cpp',
                  'cocos2d/cocos/2d/cocos2d.cpp',
                  'frameworks/cocos2d-x/cocos/cocos2d.cpp',
                  'frameworks/cocos2d-x/cocos/2d/cocos2d.cpp',
                  'frameworks/js-bindings/bindings/manual/ScriptingCore.h']
-
 
 def get_project_version(path, project_type):
     file_path = None
@@ -90,11 +81,10 @@ if __name__ == '__main__':
     cocos.Logging.info("> Modifing visual studio project for win32 ... ")
     modify_template.modify_win32(proj_file_path)
 
-    if os_is_mac():
-        tempPath, filename = os.path.split(args.projPath)
-        proj_file_path = os.path.join(target_project_path, 'proj.ios_mac/%s.xcodeproj/project.pbxproj' % filename)
-        cocos.Logging.info("> Modifing xcode project for iOS&Mac ... ")
-        modify_template.modify_mac_ios(proj_file_path)
+    tempPath, filename = os.path.split(args.projPath)
+    proj_file_path = os.path.join(target_project_path, 'proj.ios_mac/%s.xcodeproj/project.pbxproj' % filename)
+    cocos.Logging.info("> Modifing xcode project for iOS&Mac ... ")
+    modify_template.modify_mac_ios(proj_file_path)
 
     mk_file_path = os.path.join(target_project_path, 'proj.android/jni/Android.mk')
     cocos.Logging.info("> Modifing mk file for Android ...")
@@ -105,17 +95,16 @@ if __name__ == '__main__':
     fileModifier.replaceString('../cocos2d/cocos/platform/android/java', '../cocos2d/cocos/2d/platform/android/java')
     fileModifier.save()
 
-    if os_is_mac():
-        modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/AppController.mm')
-        fileModifier = modify_file.FileModifier(modify_file_path)
-        fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
-        fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
-        fileModifier.save()
+    modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/AppController.mm')
+    fileModifier = modify_file.FileModifier(modify_file_path)
+    fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
+    fileModifier.replaceString('GLViewImpl::create', 'GLView::create')
+    fileModifier.save()
 
-        modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/RootViewController.mm')
-        fileModifier = modify_file.FileModifier(modify_file_path)
-        fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
-        fileModifier.save()
+    modify_file_path = os.path.join(target_project_path, 'proj.ios_mac/ios/RootViewController.mm')
+    fileModifier = modify_file.FileModifier(modify_file_path)
+    fileModifier.replaceString('platform/ios/CCEAGLView-ios.h', 'CCEAGLView.h')
+    fileModifier.save()
 
     modify_file_path = os.path.join(target_project_path, 'Classes/AppDelegate.cpp')
     fileModifier = modify_file.FileModifier(modify_file_path)

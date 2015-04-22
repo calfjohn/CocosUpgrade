@@ -79,14 +79,14 @@ class CompareFiles(object):
                 cmd += ' -caption Left_file_is_your_code_unchanged' \
                         '________Middle_file_is_your_code_changed' \
                         '________Right_file_is_engine_code_origin'
-            elif only_left_pattern.match(str2):
-                leftFile = self.left_path + str2[20:][:-1]
-                centerFile = os.path.join(dst, str2[20:][:-1])
-                # cocos.Logging.info("Left:%s" % leftFile)
-
-                cmd = str.format('%s %s %s' % (self.diff_tool, leftFile, centerFile))
-                cmd += ' -caption Left_file_is_your_code_unchanged' \
-                        '________Right_file_is_your_code_changed'
+            # elif only_left_pattern.match(str2):
+            #     leftFile = self.left_path + str2[20:][:-1]
+            #     centerFile = os.path.join(dst, str2[20:][:-1])
+            #     # cocos.Logging.info("Left:%s" % leftFile)
+            #
+            #     cmd = str.format('%s %s %s' % (self.diff_tool, leftFile, centerFile))
+            #     cmd += ' -caption Left_file_is_your_code_unchanged' \
+            #             '________Right_file_is_your_code_changed'
             # Since the file is only in the right, we don't care about it.
             # elif only_right_pattern.match(str2):
             #     rightFile = self.right_path + str2[21:][:-1]

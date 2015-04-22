@@ -35,7 +35,9 @@ if __name__ == '__main__':
         print('unknown arguments: %s' % unknown)
         sys.exit(1)
 
-    if not os.path.exists(args.projPath) or not os.path.exists(args.cocosPath):
+    if not os.path.exists(args.projSourcePath) \
+            or not os.path.exists(args.projUpgradePath)\
+            or not os.path.exists(args.projOriginPatch):
         cocos.Logging.warning("> src or dst is not exists.")
         sys.exit(1)
 
@@ -53,9 +55,8 @@ if __name__ == '__main__':
     cocos.Logging.info("> Preparing difference file %s ..." % diff_file)
     cmd = str.format('%s -diff %s %s %s' % (diff_tool, diff_file, args.projSourcePath, args.projOriginPatch))
     ret = subprocess.call(cmd, shell=True)
-    if ret != 0:
-        sys.exit(1)
-    #os.system(cmd)
+    # if ret != 0:
+    #     sys.exit(1)
 
     cocos.Logging.info("> Compare every single difference ...")
     compareFiles = compare_diff.CompareFiles(diff_file)
