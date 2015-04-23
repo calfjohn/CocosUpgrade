@@ -66,11 +66,8 @@ if __name__ == '__main__':
     project_version = get_project_version(args.projPath, project_type)
     project_version = project_version.split(' ')[1]
 
-
     patch_file_url = str.format('%s/ftp/%s/%s_%s/%s' % (FILES_SERVER_URL, project_type, project_version, args.upgradeVersion, PATCH_FILE_NAME))
-    patch_file_path = os.path.join(os.getcwd(), PATCH_FILE_NAME)
-    if os.path.exists(patch_file_path):
-        os.remove(patch_file_path)
+    patch_file_path = str.format('%s/%s/%s_%s/%s' % (os.getcwd(), project_type, project_version, args.upgradeVersion, PATCH_FILE_NAME))
     if not os.path.exists(patch_file_path):
         installer = download_files.CocosZipInstaller(patch_file_url, patch_file_path)
         installer.download_file()
