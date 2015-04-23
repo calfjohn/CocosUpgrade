@@ -15,14 +15,7 @@ import subprocess
 from argparse import ArgumentParser
 
 UPGRADE_PATH = 'Upgrade'
-REPLACE_NAME = 'HelloJs'
-
-def os_is_win32():
-    return sys.platform == 'win32'
-
-
-def os_is_mac():
-    return sys.platform == 'darwin'
+REPLACE_NAME = 'testProject'
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Upgrade Cocos Engine for your project.')
