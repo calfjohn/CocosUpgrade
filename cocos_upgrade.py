@@ -17,6 +17,7 @@ from argparse import ArgumentParser
 
 UPGRADE_PATH = 'Upgrade'
 PATCH_FILE_NAME = '0001-Upgrade.patch'
+PATCH_ZIP_FILE_NAME = '0001-Upgrade.patch.zip'
 FILES_SERVER_URL = 'http://cocos.qudao.info'
 version_files = ['cocos2d/cocos/cocos2d.cpp',
                  'cocos2d/cocos/2d/cocos2d.cpp',
@@ -66,14 +67,23 @@ if __name__ == '__main__':
     project_version = get_project_version(args.projPath, project_type)
     project_version = project_version.split(' ')[1]
 
-    patch_file_url = str.format('%s/ftp/%s/%s_%s/%s' % (FILES_SERVER_URL, project_type, project_version, args.upgradeVersion, PATCH_FILE_NAME))
+    # Download zip file or file.
+    patch_file_url = str.format('%s/ftp/%s/%s_%s/%s' % (FILES_SERVER_URL, project_type, project_version, args.upgradeVersion, PATCH_ZIP_FILE_NAME))
     patch_path = str.format('%s/%s/%s_%s' % (os.getcwd(), project_type, project_version, args.upgradeVersion))
     if not os.path.exists(patch_path):
         os.makedirs(patch_path)
+
     patch_file_path = str.format('%s/%s' % (patch_path, PATCH_FILE_NAME))
-    if not os.path.exists(patch_file_path):
-        installer = download_files.CocosZipInstaller(patch_file_url, patch_file_path)
-        installer.download_file()
+    patch_zipfile_path = str.format('%s/%s' % (patch_path, PATCH_ZIP_FILE_NAME))
+    if not os.path.exists(patch_file_path) and not os.path.exists(patch_zipfile_path):
+        installer = download_files.CocosZipInstaller(patch_file_url, patch_zipfile_path)
+        installer.download_zip_file()
+        installer.unpack_zipfile(patch_path)
+        os.remove(patch_zipfile_path)
+    elif not os.path.exists(patch_file_path):
+        installer = download_files.CocosZipInstaller(patch_file_url, patch_zipfile_path)
+        installer.unpack_zipfile(patch_path)
+        os.remove(patch_zipfile_path)
 
     cmd = str.format('python cocos_upgrade2.py -d %s -n %s -p %s ' %
                      (args.projPath, args.projName, patch_file_path))

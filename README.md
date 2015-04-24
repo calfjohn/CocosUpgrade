@@ -26,7 +26,7 @@
 
 第一种方式，会根据游戏工程的引擎版本自动寻找下载对应的升级文件。（未完成）
 
-第二种方式，你需要自行指定升级文件，不过你可以自己创建符合自己需求的升级文件，请查看`制作升级文件`。
+第二种方式，你需要自行指定升级文件，不过你可以自己创建符合自己需求的升级文件，请查看[制作升级文件](#jump1)。
 
 	$ python cocos_upgrade.py -d /Users/testProject -n testProject -v 3.5
 	
@@ -34,7 +34,7 @@
 
 -n 游戏工程名称，请注意工程名有时与目录名称不一致，建议参考xcode工程名。
 
--v 要升级的引擎版本，请查看`支持的版本`。
+-v 要升级的引擎版本，请查看[支持的版本](#jump2)。
 
 	$ python cocos_upgrade2.py -d /Users/testProject -n testProject -p /Users/test30-35.diff
 
@@ -72,3 +72,6 @@
 -d 升级目标工程，请使用工程全路径。
 
 最后调用cocos_upgrade2.py来调用补丁进行升级。
+
+<span id="jump1">制作升级文件</span>
+<span id="jump2">支持的版本</span>
